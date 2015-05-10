@@ -1,0 +1,10 @@
+<h1>{{ graph.description }}</h1>
+<ul>
+    <li>ID: {{ graph.id }}</li>
+    <li>Category: {{ graph.get_category_display }}</li>
+    <li>RRD source: {{ graph.rrdFilename }}</li>
+    <li>Graph URL: {{ graph.imageFilename }}</li>
+    <li>Time period: {{ graph.get_timePeriod_display }} ({{ graph.timePeriod }}s)</li>
+    <li>Generation date: {{ graph.generationDate }}</li>
+</ul>
+<img src='{% url 'image' graph.id %}'/>
