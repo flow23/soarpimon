@@ -130,7 +130,7 @@ BOOTSTRAP3 = {
 
 # Settings for django-crontabs 
 CRONJOBS = [
-    ('*/1 * * * *', 'solar.cron.SerialPolling', [], {}, '>> /webapp/solar/solar/cron.log')
+    ('*/1 * * * *', 'solar.cron.SerialPolling', [], {}, '>> /webapp/solar/solar/solar/cron.log')
 ]
 
 #CRONJOBS = [
