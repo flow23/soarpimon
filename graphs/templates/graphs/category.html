@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}soarpimon (Solar Arduino Raspberry Pi Monitor){% endblock %}
+
+{% block content %}
+
+{% if graph_list %}
+    <ul>
+    {% for graph in graph_list %}
+        <li><a href="{% url 'detail' graph.id %}">{{ graph.category }} - {{ graph.get_timePeriod_display }}</a></li>
+        <img src='{% url 'image' graph.id %}'/>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No graphs are available.</p>
+{% endif %}
+
+{% endblock %}
