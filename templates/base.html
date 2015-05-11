@@ -27,16 +27,19 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <ul class="nav navbar-nav">
-                <li><a href="">blog</a></li>
+                <li><a href="">System status</a></li>
               </ul>
               <ul class="nav navbar-nav">
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Graphs <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="/graphs/category/solar">Solar</a></li>
-                    <li><a href="/graphs/category/battery">Battery</a></li>
+                    {% if categories %}
+                        {% for key, value in categories %}
+                            <li><a href="/graphs/category/{{ key }}">{{ value }}</a</li>
+                        {% endfor %} 
+                    {% endif %}
                     <li class="divider"></li>
-                    <li><a href="#">Wattage</a></li>
+                    <li><a href="#">MISCHA SUCKS HARD!</a></li>
                   </ul>
                 </li>
               </ul>

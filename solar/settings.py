@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'graphs.globalContextProcessor.graphCategories',
             ],
         },
     },
@@ -117,9 +118,6 @@ STATIC_ROOT = '/webapp/solar/solar/static'
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 MEDIA_URL = '/media/'
 
-# RRDVIEWER
-GRAPH_DATA='/var/lib/rrd_data'
-
 # Settings for django-bootstrap3
 BOOTSTRAP3 = {
     'set_required': False,
@@ -132,7 +130,7 @@ BOOTSTRAP3 = {
 CRONJOBS = [
     ('*/1 * * * *', 'solar.cron.SerialPolling', [], {}, '>> /webapp/solar/solar/solar/cron.log')
 ]
-
+CRONTAB_LOCK_JOBS = True
 #CRONJOBS = [
 #    ('*/5 * * * *', 'myproject.myapp.cron.other_scheduled_job', ['arg1', 'arg2'], {'verbose': 0}),
 #    ('0   4 * * *', 'django.core.management.call_command', ['clearsessions']),

@@ -62,6 +62,12 @@ class Graph(models.Model):
     solarObjects = SolarGraphManager()
 
     # defs
+    #def categories(self):
+    #    category = self.order_by('category').distrinct.values_list('caategory', flat=True)
+    #    lists = []
+    #    for c in category:
+    #        if c[0] == 
+
     def generateComparisonGraph(self):
         #graphDestinationFilename = ''.os.path.join([settings.MEDIA_ROOT, '/..' , self.imageFilename.url])
         #import pdb; pdb.set_trace()

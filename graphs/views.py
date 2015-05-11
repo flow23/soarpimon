@@ -11,6 +11,7 @@ from .models import Graph
 def index(request):
     graph_list = Graph.objects.all()
     #graph_list = Graph.solarObjects.all()
+    #categories = Graph._meta.get_field('category').choices
     context = {'graph_list': graph_list}
     return render(request, 'graphs/index.html', context)
 
@@ -21,7 +22,7 @@ def category(request, category):
     #else:
     #    graph_list = Graph.objects.all()
     context = {'graph_list': graph_list}
-    return render(request, 'graphs/index.html', context)
+    return render(request, 'graphs/category.html', context)
 
 def detail(request, graph_id):
     graph = get_object_or_404(Graph, pk=graph_id)
