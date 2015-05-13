@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}soarpimon (Solar Arduino Raspberry Pi Monitor){% endblock %}
+
+{% block content %}
+
+<ul>
+{% for graph in object_list %}
+    <li>{{ graph.generationDate|date }} - {{ graph.description }}</li>
+    <img src='{% url 'image' graph.id %}'/>
+    {% empty %}
+    <li>No graphs yet.</li>
+{% endfor %}
+</ul>
+
+{% endblock %}
