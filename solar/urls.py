@@ -9,13 +9,14 @@ urlpatterns = [
     # Examples:
     # url(r'^$', 'solar.views.home', name='home'),
     url(r'^$', views.IndexView.as_view(), name='home'),
+    url(r'^status/', views.StatusView.as_view(), name='status'),
     # url(r'^blog/', include('blog.urls')),
-
+ 
     # url(r'^$', 'views.index', name='index'),
     url(r'^polls/', include('polls.urls')),
-    url(r'^system-status/', include('abcdef.urls')),
+    #url(r'^system-status/', include('abcdef.urls')),
     url(r'^graphs/', include('graphs.urls')),
-    url(r'^system-status/', graphs_views.systemstatus, name='systemstatus'),
+    #url(r'^system-status/', graphs_views.systemstatus, name='system-status'),
     url(r'^admin/', include(admin.site.urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

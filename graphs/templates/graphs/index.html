@@ -4,9 +4,9 @@
 
 {% block content %}
 
-{% if graph_list %}
+{% if graphList %}
     <ul>
-    {% for graph in graph_list %}
+    {% for graph in graphList %}
         <li><a href="{% url 'detail' graph.id %}">{{ graph.category }} - {{ graph.get_timePeriod_display }}</a></li>
         <img src='{% url 'image' graph.id %}'/>
     {% endfor %}

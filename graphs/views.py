@@ -9,19 +9,21 @@ from .models import Graph
 # THIS IS WHERE THE MAGIC HAPPENS
 
 def index(request):
-    graph_list = Graph.objects.all()
+    graphList = Graph.objects.all()
     #graph_list = Graph.solarObjects.all()
     #categories = Graph._meta.get_field('category').choices
-    context = {'graph_list': graph_list}
+    context = {'graphList': graphList}
     return render(request, 'graphs/index.html', context)
 
 def category(request, category):
-    graph_list = Graph.objects.filter(category=category).order_by('timePeriod')
-    #elif (category == 'battery'):
-    #    graph_list = Graph.objects.filter(category='B')
-    #else:
-    #    graph_list = Graph.objects.all()
-    context = {'graph_list': graph_list}
+    if (category == 'battery'):
+        graphList = Graph.batteryObjects.order_by('timePeriod')
+    elif (category == 'solar'):
+        graphList = Graph.solarObjects.order_by('timePeriod')
+    else:
+        graphList = Graph.objects.filter(category=category).order_by('timePeriod')
+
+    context = {'graphList': graphList}
     return render(request, 'graphs/category.html', context)
 
 def detail(request, graph_id):
@@ -43,5 +45,5 @@ def results(request, question_id):
 def vote(request, question_id):
     return HttpResponse("You're voting on question %s." % question_id)
 
-def systemstatus(request):
+def status(request):
     return HttpResponse("KUUUUURAAAAAHEEEEE")

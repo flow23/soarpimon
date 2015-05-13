@@ -12,6 +12,10 @@ class BatteryGraphManager(models.Manager):
     def get_queryset(self):
         return super(BatteryGraphManager, self).get_queryset().filter(category='battery')
 
+class StatusGraphManager(models.Manager):
+    def get_queryset(self):
+        return super(StatusGraphManager, self).get_queryset().filter(pk__in=[1,2,3])
+
 class Graph(models.Model):
     CATEGORIES = (
         ('solar', 'Solar'),
@@ -26,13 +30,13 @@ class Graph(models.Model):
     imageFilename = models.ImageField(upload_to='graph/', blank=True)
 
     TIMEPERIODS = (
-        ('3600', '1hour'),
-        ('43200', '12hours'),
-        ('86400', '1day'),
-        ('604800', '1week'),
-        ('2419200', '1month'),
-        ('14515200', '6months'),
-        ('29030400', '1year'),
+        (3600, '1hour'),
+        (43200, '12hours'),
+        (86400, '1day'),
+        (604800, '1week'),
+        (2419200, '1month'),
+        (14515200, '6months'),
+        (29030400, '1year'),
     )
     timePeriod = models.IntegerField(choices=TIMEPERIODS, default=3600)
     start = models.CharField(max_length=50,default='end-3600')
@@ -45,12 +49,15 @@ class Graph(models.Model):
     )
     unit = models.CharField(max_length=3, choices=UNITS, default='A')
 
-    verticalLabel = models.CharField(max_length=50,default='verticalLabel')
-    watermark = models.CharField(max_length=50,default='watermark')
+    lineColor = models.CharField(max_length=9,default='#000000')
+    areaColor = models.CharField(max_length=9,default='#000000')
+
+    verticalLabel = models.CharField(max_length=50,default='verticalLabel',blank=True)
+    watermark = models.CharField(max_length=50,default='watermark',blank=True)
     width = models.IntegerField(default='640')
     height = models.IntegerField(default='180')
-    upperLimit = models.IntegerField()
-    lowerLimit = models.IntegerField(default='0')
+    upperLimit = models.IntegerField(blank=True)
+    lowerLimit = models.IntegerField(default='0',blank=True)
     lowerLimitRigid = models.BooleanField(default='true')
 
     lastChange = models.DateTimeField('last change', auto_now=True)
@@ -60,13 +67,7 @@ class Graph(models.Model):
     objects = models.Manager()
     batteryObjects = BatteryGraphManager()
     solarObjects = SolarGraphManager()
-
-    # defs
-    #def categories(self):
-    #    category = self.order_by('category').distrinct.values_list('caategory', flat=True)
-    #    lists = []
-    #    for c in category:
-    #        if c[0] == 
+    statusObjects = StatusGraphManager()
 
     def generateComparisonGraph(self):
         #graphDestinationFilename = ''.os.path.join([settings.MEDIA_ROOT, '/..' , self.imageFilename.url])
@@ -92,15 +93,15 @@ class Graph(models.Model):
         #ret = rrdtool.graph(graphDestinationFilename,
             "--start", "end-%s" % (self.timePeriod),
             "--end", "%s" % (self.end),
-            #"--vertical-label=%s" % (self.verticalLabel),
+            "--vertical-label=%s" % (self.verticalLabel),
             "--watermark=%s" % (self.watermark),
             "--width", "%s" % (self.width),
             "--upper-limit", "%s" % (self.upperLimit),
             "--lower-limit", "%s" % (self.lowerLimit), lowerLimitRigid,
             "DEF:%s=%s:%s:AVERAGE" % (definitionOne, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne),
             "DEF:%s=%s:%s:AVERAGE:end=now-%s:start=end-%s" % (definitionOneShift, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne, self.timePeriod, self.timePeriod),
-            "AREA:%s#00FF0066" % (definitionOne) ,
-            "LINE2:%s#00990066:%s" % (definitionOne, self.get_unit_display()) ,
+            "AREA:%s%s" % (definitionOne, self.areaColor) ,
+            "LINE2:%s%s:%s" % (definitionOne, self.lineColor, self.get_unit_display()) ,
             "GPRINT:{0}:MIN:Min\: %2.2lf{1}".format(definitionOne, self.unit) ,
             "GPRINT:{0}:AVERAGE:Average\: %2.2lf{1}".format(definitionOne, self.unit) ,
             "GPRINT:{0}:MAX:Max\: %2.2lf{1}".format(definitionOne, self.unit) ,
