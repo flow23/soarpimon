@@ -9,7 +9,7 @@
     <li>{{ graph.generationDate|date }} - {{ graph.description }}</li>
     <img src='{% url 'image' graph.id %}'/>
     {% empty %}
-    <li>No graphs yet.</li>
+    <li>No graphs defined for status page yet.</li>
 {% endfor %}
 </ul>
 

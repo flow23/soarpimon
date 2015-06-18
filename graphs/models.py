@@ -14,7 +14,8 @@ class BatteryGraphManager(models.Manager):
 
 class StatusGraphManager(models.Manager):
     def get_queryset(self):
-        return super(StatusGraphManager, self).get_queryset().filter(pk__in=[1,2,3])
+        #return super(StatusGraphManager, self).get_queryset().filter(pk__in=[1,2,3])
+        return super(StatusGraphManager, self).get_queryset().filter(displayOnStatusPage=True)
 
 class Graph(models.Model):
     CATEGORIES = (
@@ -49,8 +50,8 @@ class Graph(models.Model):
     )
     unit = models.CharField(max_length=3, choices=UNITS, default='A')
 
-    lineColor = models.CharField(max_length=9,default='#000000')
-    areaColor = models.CharField(max_length=9,default='#000000')
+    lineColor = models.CharField(max_length=9,default='#00000066')
+    areaColor = models.CharField(max_length=9,default='#00000066')
 
     verticalLabel = models.CharField(max_length=50,default='verticalLabel',blank=True)
     watermark = models.CharField(max_length=50,default='watermark',blank=True)
@@ -58,7 +59,9 @@ class Graph(models.Model):
     height = models.IntegerField(default='180')
     upperLimit = models.IntegerField(blank=True)
     lowerLimit = models.IntegerField(default='0',blank=True)
-    lowerLimitRigid = models.BooleanField(default='true')
+    lowerLimitRigid = models.BooleanField(default=True)
+
+    displayOnStatusPage = models.BooleanField(default=False)
 
     lastChange = models.DateTimeField('last change', auto_now=True)
     generationDate = models.DateTimeField('date generated', default=timezone.now)
@@ -94,7 +97,7 @@ class Graph(models.Model):
             "--start", "end-%s" % (self.timePeriod),
             "--end", "%s" % (self.end),
             "--vertical-label=%s" % (self.verticalLabel),
-            "--watermark=%s" % (self.watermark),
+            "--watermark=[%s] / %s" % (self.pk, self.watermark),
             "--width", "%s" % (self.width),
             "--upper-limit", "%s" % (self.upperLimit),
             "--lower-limit", "%s" % (self.lowerLimit), lowerLimitRigid,
