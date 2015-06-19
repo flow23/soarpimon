@@ -1,79 +1,36 @@
-import os.path
+#import Adafruit_DHT
 import logging, random, serial, time
 from solar import settings
 from rrdtool import update
 
 def SerialPolling():
     # RRD filenames
-    rrdBatteryFile = '/webapp/solar/solar/solar/media/rrd/battery.rrd' 
-    rrdSolarFile = '/webapp/solar/solar/solar/media/rrd/solar.rrd'
+    rrdBatteryFile = '/webapp/solar_django/solar/solar/media/rrd/battery.rrd' 
+    rrdSolarFile = '/webapp/solar_django/solar/solar/media/rrd/solar.rrd'
+    rrdAM2302File = '/webapp/solar_django/solar/solar/media/rrd/AM2302.rrd'
 
-    # Serial tranmission flags
-    transmissionSuccessful = ''
-    transmissionTimeout = ''
+    # Sensor should be set to Adafruit_DHT.DHT11,
+    # Adafruit_DHT.DHT22, or Adafruit_DHT.AM2302.
+    #sensor = Adafruit_DHT.AM2302
 
-    # Serial setup
-    ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=55)
+    # Example using a Raspberry Pi with DHT sensor
+    # connected to pin 14.
+    #pin = 14
 
-    start_time = time.time()
+    # Try to grab a sensor reading.  Use the read_retry method which will retry up
+    # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
+    #humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
 
-    while transmissionSuccessful == '' and transmissionTimeout == '':
-        incoming = ser.readline().strip()
-        #logger.info('Serial received %s', incoming)
-        #ser.write('RPi Received: %s\n' % incoming)
+    # Fake data for gods sake
+    voltBattery = random.uniform(11, 14)
+    ampereBattery = random.uniform(0, 1)
+    voltSolar = random.uniform(11, 18)
+    ampereSolar = random.uniform(0, 5)
 
-        incomingSplit = str(incoming).split("|")
-        incomingCount = len(incomingSplit)
-
-        if incomingCount == 6:
-            incomingFirstValue = incoming.split('|')[0]
-            incomingLastValue = incoming.split('|')[5]
-
-            if (incomingFirstValue == 'bt' and incomingLastValue == 'et'):
-                #logger.info('Complete transmission received')
-
-                voltBattery = incoming.split('|')[1]
-                ampereBattery = incoming.split('|')[2]
-                voltSolar = incoming.split('|')[3]
-                ampereSolar = incoming.split('|')[4]
-
-                #logger.debug('voltBattery: %s', voltBattery)
-                #logger.debug('ampereBattery: %s', ampereBattery)
-                #logger.debug('voltSolar: %s', voltSolar)
-                #logger.debug('ampereSolar: %s', ampereSolar)
-
-                transmissionSuccessful = 'x'
-            #else:
-                #logger.info('Tranmission is invalid')
-
-        # Runtime
-        elapsed_time = time.time() - start_time
-
-        if elapsed_time > 50:
-            #logger.info('Timeout reached')
-            transmissionTimeout = 'x'
-
-            # Fake data for gods sake
-            voltBattery = random.uniform(11, 14)
-            ampereBattery = random.uniform(0, 1)
-            voltSolar = random.uniform(11, 18)
-            ampereSolar = random.uniform(0, 5)
-
-    # Time after successful transmission
-    elapsed_time = time.time() - start_time
-
-    #logger.info('Elapsed time: %s', elapsed_time)
-
+    # Building update string
     updateString = '%s:%s:%s:%s' % (voltBattery, ampereBattery, voltSolar, ampereSolar)
 
-    #logger.debug('Update rrd: %s', updateString)
-    #print updateString
-
-    #voltBattery = string.split(':')[0]
-    #ampereBattery = string.split(':')[1]
-    #voltSolar = string.split(':')[2]
-    #ampereSolar = string.split(':')[3]
-
+    # Update round-robin-database
     batteryUpdate = update(rrdBatteryFile, 'N:%s:%s' % (voltBattery, ampereBattery))
     solarUpdate = update(rrdSolarFile, 'N:%s:%s' % (voltSolar, ampereSolar))
 

@@ -22,6 +22,7 @@ class Graph(models.Model):
         ('solar', 'Solar'),
         ('battery', 'Battery'),
         ('wattage', 'Wattage'),
+        ('weather', 'Weather'),
     )
     category = models.CharField(max_length=7, choices=CATEGORIES)
 
@@ -45,6 +46,8 @@ class Graph(models.Model):
 
     UNITS = (
         ('A', 'Ampere'),
+        ('C', 'Celsius'),
+        ('P', '%'),
         ('V', 'Volt'),
         ('W', 'Wattage'),
     )
@@ -83,6 +86,16 @@ class Graph(models.Model):
         elif (self.category == 'battery'):
             definitionOne = 'volt'
             definitionOneShift= 'voltShift'
+        elif (self.category == 'weather'):
+            if (self.unit == 'C'):
+                definitionOne = 'temperature'
+                definitionOneShift= 'temperatureShift'
+            elif (self.unit == 'P'):
+                definitionOne = 'humidity'
+                definitionOneShift= 'humidityShift'
+            else:
+                definitionOne = 'example'
+                definitionOneShift= 'exampleShift'
         else:
             definitionOne = 'solar'
             definitionOneShift= 'solarShift'
