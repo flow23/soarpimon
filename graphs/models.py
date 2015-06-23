@@ -1,4 +1,4 @@
-import rrdtool, os
+import datetime, rrdtool, os
 
 from django.db import models
 from django.utils import timezone
@@ -105,15 +105,18 @@ class Graph(models.Model):
         else:
             lowerLimitRigid = ''
 
+        self.generationDate = timezone.now()
+
         ret = rrdtool.graph(''.join([settings.MEDIA_ROOT, '/..' ,self.imageFilename.url]),
         #ret = rrdtool.graph(graphDestinationFilename,
             "--start", "end-%s" % (self.timePeriod),
             "--end", "%s" % (self.end),
             "--vertical-label=%s" % (self.verticalLabel),
-            "--watermark=[%s] / %s" % (self.pk, self.watermark),
+            "--watermark=[%s] / %s / %s" % (self.pk, self.watermark, self.generationDate.strftime("%Y.%m.%d %H:%M")),
             "--width", "%s" % (self.width),
             "--upper-limit", "%s" % (self.upperLimit),
             "--lower-limit", "%s" % (self.lowerLimit), lowerLimitRigid,
+            "--slope-mode",
             "DEF:%s=%s:%s:AVERAGE" % (definitionOne, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne),
             "DEF:%s=%s:%s:AVERAGE:end=now-%s:start=end-%s" % (definitionOneShift, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne, self.timePeriod, self.timePeriod),
             "AREA:%s%s" % (definitionOne, self.areaColor) ,
@@ -129,7 +132,9 @@ class Graph(models.Model):
             "GPRINT:{0}:MAX:Max\: %2.2lf{1}".format(definitionOneShift, self.unit),
             "GPRINT:{0}:LAST:Current\: %2.2lf{1}\\r".format(definitionOneShift, self.unit)),
 
-        self.generationDate = timezone.now()
+#        self.generationDate = timezone.now()
         self.save()
 
-        return self
+#            return ret
+#        else:
+#            return self

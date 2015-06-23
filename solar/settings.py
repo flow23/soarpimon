@@ -99,13 +99,13 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'CET'
+TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+#USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -131,6 +131,7 @@ CRONJOBS = [
     ('*/1 * * * *', 'solar.cron.SerialPolling', [], {}, '>> /webapp/solar_django/solar/solar/cron.log')
 ]
 CRONTAB_LOCK_JOBS = True
+CRONTAB_COMMAND_PREFIX = 'sudo'
 #CRONJOBS = [
 #    ('*/5 * * * *', 'myproject.myapp.cron.other_scheduled_job', ['arg1', 'arg2'], {'verbose': 0}),
 #    ('0   4 * * *', 'django.core.management.call_command', ['clearsessions']),

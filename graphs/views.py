@@ -1,8 +1,11 @@
+import datetime
+
 from os.path import join
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
+from django.utils import timezone
 
 from .models import Graph
 
@@ -32,9 +35,15 @@ def detail(request, graph_id):
 
 def image(request, graph_id):
     graph = get_object_or_404(Graph, pk=graph_id)
-    #imageData = open('/webapp/solar/solar/solar/media/solar-ampere-compare-hour.png', 'rb').read()
-    #path = join(os.path.dirname(__file__),  graph.imageFilename.url)
-    graph.generateComparisonGraph()
+
+    # Initial graph genertion after creation
+    if graph.generationDate is None:
+        graph.generateComparisonGraph()
+
+    # Graphs get generated after a 1800 seconds period at the earliest
+    if (timezone.now() - datetime.timedelta(seconds=1800)) >= graph.generationDate:
+        graph.generateComparisonGraph()
+
     graphImage = graph.imageFilename.read()
     return HttpResponse(graphImage, content_type='image/png')
 
