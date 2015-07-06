@@ -23,6 +23,8 @@ def category(request, category):
         graphList = Graph.batteryObjects.order_by('timePeriod')
     elif (category == 'solar'):
         graphList = Graph.solarObjects.order_by('timePeriod')
+    elif (category == 'weather'):
+        graphList = Graph.weatherObjects.order_by('timePeriod')
     else:
         graphList = Graph.objects.filter(category=category).order_by('timePeriod')
 

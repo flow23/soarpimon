@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='home'),
     url(r'^status/', views.StatusView.as_view(), name='status'),
     # url(r'^blog/', include('blog.urls')),
- 
+
     # url(r'^$', 'views.index', name='index'),
     url(r'^polls/', include('polls.urls')),
     #url(r'^system-status/', include('abcdef.urls')),

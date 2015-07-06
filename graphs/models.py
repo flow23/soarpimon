@@ -1,8 +1,11 @@
-import datetime, rrdtool, os
+import datetime, logging, rrdtool, os
 
 from django.db import models
 from django.utils import timezone
 from solar import settings
+
+# Get a logger instance
+logger = logging.getLogger(__name__)
 
 class SolarGraphManager(models.Manager):
     def get_queryset(self):
@@ -14,8 +17,11 @@ class BatteryGraphManager(models.Manager):
 
 class StatusGraphManager(models.Manager):
     def get_queryset(self):
-        #return super(StatusGraphManager, self).get_queryset().filter(pk__in=[1,2,3])
         return super(StatusGraphManager, self).get_queryset().filter(displayOnStatusPage=True)
+
+class WeatherGraphManager(models.Manager):
+    def get_queryset(self):
+        return super(WeatherGraphManager, self).get_queryset().filter(category='weather')
 
 class Graph(models.Model):
     CATEGORIES = (
@@ -74,8 +80,11 @@ class Graph(models.Model):
     batteryObjects = BatteryGraphManager()
     solarObjects = SolarGraphManager()
     statusObjects = StatusGraphManager()
+    weatherObjects = WeatherGraphManager()
 
     def generateComparisonGraph(self):
+        logger.info('BEGIN')
+
         #graphDestinationFilename = ''.os.path.join([settings.MEDIA_ROOT, '/..' , self.imageFilename.url])
         #import pdb; pdb.set_trace()
         #abnc = settings.MEDIA_ROOT
@@ -107,34 +116,76 @@ class Graph(models.Model):
 
         self.generationDate = timezone.now()
 
-        ret = rrdtool.graph(''.join([settings.MEDIA_ROOT, '/..' ,self.imageFilename.url]),
-        #ret = rrdtool.graph(graphDestinationFilename,
-            "--start", "end-%s" % (self.timePeriod),
-            "--end", "%s" % (self.end),
-            "--vertical-label=%s" % (self.verticalLabel),
-            "--watermark=[%s] / %s / %s" % (self.pk, self.watermark, self.generationDate.strftime("%Y.%m.%d %H:%M")),
-            "--width", "%s" % (self.width),
-            "--upper-limit", "%s" % (self.upperLimit),
-            "--lower-limit", "%s" % (self.lowerLimit), lowerLimitRigid,
-            "--slope-mode",
-            "DEF:%s=%s:%s:AVERAGE" % (definitionOne, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne),
-            "DEF:%s=%s:%s:AVERAGE:end=now-%s:start=end-%s" % (definitionOneShift, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne, self.timePeriod, self.timePeriod),
-            "AREA:%s%s" % (definitionOne, self.areaColor) ,
-            "LINE2:%s%s:%s" % (definitionOne, self.lineColor, self.get_unit_display()) ,
-            "GPRINT:{0}:MIN:Min\: %2.2lf{1}".format(definitionOne, self.unit) ,
-            "GPRINT:{0}:AVERAGE:Average\: %2.2lf{1}".format(definitionOne, self.unit) ,
-            "GPRINT:{0}:MAX:Max\: %2.2lf{1}".format(definitionOne, self.unit) ,
-            "GPRINT:{0}:LAST:Current\: %2.2lf{1}\\r".format(definitionOne, self.unit) ,
-            "SHIFT:{0}:{1}".format(definitionOneShift, self.timePeriod),
-            "LINE1:{0}#00000066:{1} comparison:dashes".format(definitionOneShift, self.get_unit_display()),
-            "GPRINT:{0}:MIN:Min\: %2.2lf{1}".format(definitionOneShift, self.unit),
-            "GPRINT:{0}:AVERAGE:Average\: %2.2lf{1}".format(definitionOneShift, self.unit),
-            "GPRINT:{0}:MAX:Max\: %2.2lf{1}".format(definitionOneShift, self.unit),
-            "GPRINT:{0}:LAST:Current\: %2.2lf{1}\\r".format(definitionOneShift, self.unit)),
+        try:
+            rrdtoolGraph = rrdtool.graph(''.join([settings.MEDIA_ROOT, '/..' ,self.imageFilename.url]),
+                "--start", "end-%s" % (self.timePeriod),
+                "--end", "%s" % (self.end),
+                "--vertical-label=%s" % (self.verticalLabel),
+                "--watermark=[%s] / %s / %s" % (self.pk, self.watermark, self.generationDate.strftime("%Y.%m.%d %H:%M")),
+                "--width", "%s" % (self.width),
+                "--upper-limit", "%s" % (self.upperLimit),
+                "--lower-limit", "%s" % (self.lowerLimit), lowerLimitRigid,
+                "--slope-mode",
+                "DEF:%s=%s:%s:AVERAGE" % (definitionOne, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne),
+                "DEF:%s=%s:%s:AVERAGE:end=now-%s:start=end-%s" % (definitionOneShift, ''.join([settings.MEDIA_ROOT, '/..' ,self.rrdFilename.url]), definitionOne, self.timePeriod, self.timePeriod),
+                "AREA:%s%s" % (definitionOne, self.areaColor) ,
+                "LINE2:%s%s:%s" % (definitionOne, self.lineColor, self.get_unit_display()) ,
+                "GPRINT:{0}:MIN:Min\: %2.2lf{1}".format(definitionOne, self.unit) ,
+                "GPRINT:{0}:AVERAGE:Average\: %2.2lf{1}".format(definitionOne, self.unit) ,
+                "GPRINT:{0}:MAX:Max\: %2.2lf{1}".format(definitionOne, self.unit) ,
+                "GPRINT:{0}:LAST:Current\: %2.2lf{1}\\r".format(definitionOne, self.unit) ,
+                "SHIFT:{0}:{1}".format(definitionOneShift, self.timePeriod),
+                "LINE1:{0}#00000066:{1} comparison:dashes".format(definitionOneShift, self.get_unit_display()),
+                "GPRINT:{0}:MIN:Min\: %2.2lf{1}".format(definitionOneShift, self.unit),
+                "GPRINT:{0}:AVERAGE:Average\: %2.2lf{1}".format(definitionOneShift, self.unit),
+                "GPRINT:{0}:MAX:Max\: %2.2lf{1}".format(definitionOneShift, self.unit),
+                "GPRINT:{0}:LAST:Current\: %2.2lf{1}\\r".format(definitionOneShift, self.unit)),
 
-#        self.generationDate = timezone.now()
-        self.save()
+            self.save()
+        except:
+            logger.error('TRY FETCH ERROR')
+            pass
 
-#            return ret
-#        else:
-#            return self
+        logger.info('END')
+
+    def fetchRRD(self, resolution, start, end, datasourceToFetch):
+        logger.info('BEGIN -> resolution: %s, start: %s, end: %s, datasourceToFetch: %s' % (resolution, start, end, datasourceToFetch))
+        # rrdtool fetch AM2302.rrd AVERAGE -r 60 -e now-5minutes -s e-1day
+        rrdtoolFetch = rrdtool.fetch(''.join([settings.MEDIA_ROOT, '/../' ,self.rrdFilename.url]), 'AVERAGE', '-r 60', '-e now', '-s e-1d')
+
+        #logger.info('rrdtoolFetch -> %s, %s ,%s' % (rrdtoolFetch[0], rrdtoolFetch[1], rrdtoolFetch[2]))
+        logger.info('rrdtoolFetch -> %s, %s' % (rrdtoolFetch[0], rrdtoolFetch[1]))
+
+        datasources =  rrdtoolFetch[1]
+        i = 0
+        datasourceMatch = 9999
+
+        for datasource in datasources:
+            # logger.debug('i: %s' % i)
+            # logger.debug('datasourceMatch: %s' % datasourceMatch)
+            # logger.debug('datasource: %s' % datasource)
+            # logger.debug('datasourceToFetch: %s' % datasourceToFetch)
+            if datasource == datasourceToFetch:
+                datasourceMatch = i
+            else:
+                i += 1
+
+        valueList = []
+        for value in rrdtoolFetch[2]:
+            # logger.debug('value: %s' % value[datasourceMatch])
+            if value[datasourceMatch] is not None:
+                valueList.append(float(value[datasourceMatch]))
+
+        minValue = min(valueList)
+        maxValue = max(valueList)
+        averageValue = sum(valueList) / float(len(valueList))
+
+        returnValues = []
+        returnValues.append(rrdtoolFetch[2])
+        returnValues.append(minValue)
+        returnValues.append(maxValue)
+        returnValues.append(averageValue)
+
+        logger.info('END -> minValue: %s, averageValue: %s, maxValue: %s' % (minValue, averageValue, maxValue))
+
+        return returnValues
