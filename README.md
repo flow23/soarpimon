@@ -1,5 +1,5 @@
-# soarpimon
-Solar Arduino Raspberry Pi Monitor
+# solarpimon
+Solar (Raspberry) Pi Monitor
 
 ## Description
 python3
